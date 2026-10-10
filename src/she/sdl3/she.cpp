@@ -300,14 +300,14 @@ namespace she {
     SDL3EventQueue() {
 #if defined(__EMSCRIPTEN__)
         EM_ASM(
-            const onPointerEvent = Module.cwrap("onPointerEvent", "", ["number", "number"]);
-	    const listener = event => {
-		onPointerEvent((event.pointerType == "pen")|0, event.pressure);
-	    };
-            Module.canvas.addEventListener("pointerdown", listener);
-	    Module.canvas.addEventListener("pointermove", listener);
-	    Module.canvas.addEventListener("pointerup", listener);
-            );
+          const onPointerEvent = Module.cwrap("onPointerEvent", "", ["number", "number"]);
+          const listener = event => {
+            onPointerEvent((event.pointerType == "pen")|0, event.pressure);
+          };
+          Module.canvas.addEventListener("pointerdown", listener);
+          Module.canvas.addEventListener("pointermove", listener);
+          Module.canvas.addEventListener("pointerup", listener);
+        );
 #endif
       if (reverseKeyCodeMapping.empty()) {
         for (auto& entry : keyCodeMapping) {
@@ -331,15 +331,15 @@ namespace she {
 
     void refresh() {
       if (!m_events.empty())
-	return;
+        return;
       Event event;
       while (true) {
-	event.setType(Event::None);
-	getEventInternal(event, false);
-	if (event.type() == Event::None) {
-	  return;
-	}
-	m_events.push(event);
+        event.setType(Event::None);
+        getEventInternal(event, false);
+        if (event.type() == Event::None) {
+          return;
+        }
+        m_events.push(event);
       }
     }
 
@@ -348,7 +348,7 @@ namespace she {
       if (m_events.try_pop(event))
         return;
       if (she::instance()->isGfxThread())
-	getEventInternal(event, false);
+          getEventInternal(event, false);
     }
 
     void getEventInternal(Event& event, bool) {
@@ -384,9 +384,9 @@ namespace she {
           continue;
 
         case SDL_EVENT_WINDOW_RESIZED: {
-	        #ifdef __EMSCRIPTEN__
-	        continue;
-	        #else
+#ifdef __EMSCRIPTEN__
+          continue;
+#else
           auto display = sdl::windowIdToDisplay[sdlEvent.window.windowID];
           display->setWidth(sdlEvent.window.data1);
           display->setHeight(sdlEvent.window.data2);
@@ -394,7 +394,7 @@ namespace she {
           event.setType(Event::ResizeDisplay);
           event.setDisplay(display);
           return;
-	        #endif
+#endif
         }
         case SDL_EVENT_WINDOW_MOUSE_LEAVE: {
           if (display_has_mouse) {
@@ -430,22 +430,21 @@ namespace she {
             sdlEvent.motion.x / unique_display->scale(),
             sdlEvent.motion.y / unique_display->scale()
           ));
-	        {
-	          int hasFingerEvent = SDL_PeepEvents(&sdlEvent, 1, SDL_PEEKEVENT, SDL_EVENT_FINGER_MOTION, SDL_EVENT_FINGER_MOTION);
-	          if (hasFingerEvent) {
-		          penPressure = std::max<>(sdlEvent.tfinger.pressure, 0.0001f);
-	          }
-	        }
+	      {
+	        int hasFingerEvent = SDL_PeepEvents(&sdlEvent, 1, SDL_PEEKEVENT, SDL_EVENT_FINGER_MOTION, SDL_EVENT_FINGER_MOTION);
+            if (hasFingerEvent) {
+              penPressure = std::max<>(sdlEvent.tfinger.pressure, 0.0001f);
+            }
+          }
 
+          if (sdlEvent.motion.which == SDL_PEN_MOUSEID) {
+            pointerType = PointerType::Pen;
+            if (penPressure == 0.0f)
+              penPressure = 0.0001f;
+          }
 
-	  if (sdlEvent.motion.which == SDL_PEN_MOUSEID) {
-	    pointerType = PointerType::Pen;
-	    if (penPressure == 0.0f)
-	      penPressure = 0.0001f;
-	  }
-
-	  event.setPressure(penPressure);
-	  event.setPointerType(pointerType);
+          event.setPressure(penPressure);
+          event.setPointerType(pointerType);
           return;
 
         case SDL_EVENT_FINGER_MOTION:
@@ -522,7 +521,7 @@ namespace she {
           if (sdlEvent.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
             using namespace std::chrono_literals;
             if (delta < 200ms) { event.setType(Event::MouseDoubleClick); }
-          else {
+          } else {
             lastUpTime = now;
           }
 
